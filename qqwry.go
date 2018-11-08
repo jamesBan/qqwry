@@ -8,7 +8,6 @@ import (
 	"net"
 	"os"
 	"strings"
-
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
 

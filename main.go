@@ -8,6 +8,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+	"net"
+	"errors"
 )
 
 func main() {
@@ -33,7 +35,7 @@ func main() {
 
 	log.Printf("开始监听网络端口:%s", *port)
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", *port), nil); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf("127.0.0.1:%s", *port), nil); err != nil {
 		log.Println(err)
 	}
 }
@@ -45,11 +47,21 @@ func findIP(w http.ResponseWriter, r *http.Request) {
 	ip := r.Form.Get("ip")
 
 	if ip == "" {
-		res.ReturnError(http.StatusBadRequest, 200001, "请填写 IP 地址")
+		res.ReturnError(http.StatusBadRequest,  "请填写 IP 地址")
 		return
 	}
 
 	ips := strings.Split(ip, ",")
+	err, ips := validateIp(ips)
+	if err != nil {
+		res.ReturnError(http.StatusBadRequest,  err.Error())
+		return
+	}
+
+	if len(ips) <1 {
+		res.ReturnError(http.StatusBadRequest, "请填写 IP 地址")
+		return
+	}
 
 	qqWry := NewQQwry()
 
@@ -61,4 +73,19 @@ func findIP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res.ReturnSuccess(rs)
+}
+
+func validateIp(ips []string)(error, []string) {
+	if len(ips) < 1 {
+		return errors.New("ip 不能为空"), nil
+	}
+
+	filteredIps := []string{}
+	for _, ip := range ips {
+		if net.ParseIP(ip) != nil {
+			filteredIps = append(filteredIps, ip)
+		}
+	}
+
+	return nil, filteredIps
 }

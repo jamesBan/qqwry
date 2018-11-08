@@ -35,7 +35,7 @@ func main() {
 
 	log.Printf("开始监听网络端口:%s", *port)
 
-	if err := http.ListenAndServe(fmt.Sprintf("127.0.0.1:%s", *port), nil); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", *port), nil); err != nil {
 		log.Println(err)
 	}
 }
